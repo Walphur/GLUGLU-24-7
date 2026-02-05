@@ -1,0 +1,15 @@
+{
+  "name": "gluglu-vending",
+  "version": "1.0.0",
+  "description": "Interfaz Vending Machine GluGlu",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=14.x"
+  }
+}
