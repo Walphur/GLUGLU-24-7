@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GluGlu - Agua Pura</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <div class="status-bar">
+                <span id="status-online">
+                    <svg class="icon-inline" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    Sistema Online
+                </span>
+                <span id="tds-info">Calidad: 15 ppm (Pura)</span>
+            </div>
+            <img src="gluglu.png" alt="GluGlu Logo" class="logo" onclick="checkSecretMenu()">
+        </header>
+
+        <main id="pantalla-principal" class="vista">
+            <h2>Seleccione su carga:</h2>
+            <div class="grid-botones">
+                <button onclick="seleccionar(1, 200)">1 Litro <br><span>$200</span></button>
+                <button onclick="seleccionar(2, 350)">2 Litros <br><span>$350</span></button>
+                <button onclick="seleccionar(5, 800)">5 Litros <br><span>$800</span></button>
+                <button onclick="seleccionar(10, 1500)">10 Litros <br><span>$1500</span></button>
+                <button onclick="seleccionar(20, 2800)" class="btn-destacado">20 Litros <br><span>$2800</span></button>
+            </div>
+        </main>
+
+        <section id="pantalla-pago" class="vista oculto">
+            <h2>Escanee para pagar</h2>
+            <p id="detalle-pago">--</p>
+            
+            <div id="qr-container">
+                <img id="qr-image" src="" alt="QR Pago">
+            </div>
+            
+            <p id="msg-pago" style="margin-top: 20px; font-weight: 600;">Iniciando pago...</p>
+            <button class="btn-cancelar" onclick="cancelar()">Cancelar Operación</button>
+        </section>
+
+        <section id="pantalla-lavado" class="vista oculto">
+            <h2 id="titulo-lavado">¿Desea enjuagar el bidón?</h2>
+            <p id="instruccion-lavado">Coloque el bidón <b>boca abajo</b> sobre el aspersor.</p>
+            
+            <div class="grid-lavado" id="botones-lavado">
+                <button onclick="ejecutarEnjuague()" class="btn-enjuague">
+                    <svg class="icon-btn" viewBox="0 0 24 24"><path d="M12 22c4.97 0 9-4.03 9-9c0-4.97-9-13-9-13S3 8.03 3 13c0 4.97 4.03 9 9 9z"/></svg>
+                    Enjuagar <span>(3 segs)</span>
+                </button>
+                <button onclick="irALlenado(false)" class="btn-saltar">
+                    <svg class="icon-btn" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+                    Saltar paso
+                </button>
+            </div>
+        </section>
+
+        <section id="pantalla-llenado" class="vista oculto">
+            <h2 id="txt-llenando">Llenando...</h2>
+            <div class="progreso-container">
+                <div id="barra-progreso"></div>
+            </div>
+            <p id="litros-contador">0.00 / 0.00 L</p>
+            
+            <button class="btn-stop-emergencia" onclick="pausarCarga(true)">
+                <svg class="icon-btn" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                PAUSAR / EMERGENCIA
+            </button>
+        </section>
+
+        <section id="pantalla-error" class="vista oculto">
+            </section>
+
+        <section id="admin-panel" class="vista oculto">
+            <div class="admin-header">
+                <h2>Administrador</h2>
+                <button onclick="cerrarAdmin()" class="btn-close">✕</button>
+            </div>
+
+            <div id="admin-login-view">
+                <p style="margin-bottom: 15px;">Ingrese contraseña:</p>
+                <input type="password" id="admin-pass" placeholder="****">
+                <button onclick="verificarAdmin()" class="btn-login">Ingresar</button>
+                <p id="admin-error" class="error-msg"></p>
+            </div>
+
+            <div id="admin-dashboard-view" class="oculto">
+                <div class="stats-box">
+                    <p>Total: <span id="stat-litros">1450.5 L</span></p>
+                    <p>Caja: <span id="stat-dinero">$854,000</span></p>
+                </div>
+                <h3>Controles</h3>
+                <div class="grid-botones">
+                    <button onclick="accionAdmin('PURGAR')" class="btn-admin">
+                        <svg class="icon-btn-dark" viewBox="0 0 24 24"><path d="M19 14v4h-2v-4h-2v4h-2v-4h-2v4h-2v-4H7v6h14v-6h-2zM4 4h16v10h2V2H2v12h2V4z"/></svg>
+                        Purgar
+                    </button>
+                    <button onclick="accionAdmin('RESET_FILTRO')" class="btn-admin">
+                        <svg class="icon-btn-dark" viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-8 3.58-8 8s3.58 8 8 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                        Filtros
+                    </button>
+                    <button onclick="accionAdmin('TEST_LED')" class="btn-admin">
+                        <svg class="icon-btn-dark" viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>
+                        Luces
+                    </button>
+                    <button onclick="accionAdmin('APAGAR')" class="btn-admin warning">
+                        <svg class="icon-btn-dark" style="fill:#d32f2f" viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42A7.92 7.92 0 0119 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.35 1.15-4.42 2.95-5.75l-1.42-1.42C4.18 6.64 3 9.17 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.83-1.18-5.36-3.17-7.17z"/></svg>
+                        Reiniciar
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="custom-alert-overlay" class="oculto">
+        <div class="custom-alert-box">
+            <div class="alert-header">
+                <h3 id="alert-title">Información</h3>
+            </div>
+            <div class="alert-body"><div id="alert-msg"></div></div>
+            <div class="alert-footer">
+                <button onclick="cerrarAlerta()" class="btn-alert-ok">Entendido</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
