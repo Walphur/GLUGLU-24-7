@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+:root {
+    --bg-gradient: linear-gradient(135deg, #0f203e 0%, #1a4f7a 50%, #00d2a8 100%);
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --highlight-green: #1effa5;
+    --wash-blue: #3498db;
+    --text-dark: #051937;
+    --text-light: #ffffff;
+    --danger: #ff4d4d;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+#app {
+    width: 100%;
+    max-width: 500px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid var(--glass-border);
+    border-radius: 40px;
+    padding: 30px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+    text-align: center;
+    position: relative; 
+    overflow: hidden; 
+    
+    /* CENTRADO Y ESTIRAMIENTO */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* Estira los hijos al 100% */
+}
+
+section.vista {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* HEADER */
+.status-bar { width: 100%; display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 20px; opacity: 0.9; }
+#status-online { color: var(--highlight-green); display: flex; align-items: center; }
+.logo { width: 180px; display: block; margin: 0 auto 30px auto; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3)); cursor: pointer; }
+h2 { margin-bottom: 25px; font-weight: 600; font-size: 1.4rem; text-align: center; width: 100%; }
+
+/* ICONOS */
+.icon-inline { width: 20px; height: 20px; fill: currentColor; vertical-align: middle; margin-right: 5px; }
+.icon-btn { width: 24px; height: 24px; fill: white; margin-right: 8px; vertical-align: middle; }
+.icon-btn-dark { width: 32px; height: 32px; fill: var(--text-dark); display: block; margin: 0 auto 5px auto; }
+.icon-large { width: 60px; height: 60px; fill: currentColor; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); display: block; margin-left: auto; margin-right: auto;}
+
+/* BOTONES PRINCIPALES */
+.grid-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
+
+button {
+    border: none; border-radius: 20px; padding: 20px 10px;
+    font-family: 'Poppins', sans-serif; cursor: pointer;
+    transition: transform 0.2s; background: white; color: var(--text-dark);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 1.2rem; font-weight: 700; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    width: 100%;
+}
+button:active { transform: scale(0.96); }
+button span { font-size: 0.9rem; color: #666; font-weight: 400; margin-top: 5px; }
+
+.btn-destacado { grid-column: span 2; background: var(--highlight-green); color: var(--text-dark); padding: 25px; box-shadow: 0 0 20px rgba(30, 255, 165, 0.4); }
+.btn-row-flex { flex-direction: row !important; gap: 5px; }
+
+/* LAVADO */
+.grid-lavado {
+    display: flex; flex-direction: column; gap: 15px; width: 100%;
+}
+.btn-enjuague { 
+    background: var(--wash-blue); color: white; flex-direction: row; height: 80px;
+    justify-content: center; gap: 10px; 
+}
+/* ARREGLO DEL TEXTO GRIS */
+.btn-enjuague span { color: rgba(255,255,255,0.9) !important; font-size: 1rem; margin-top: 0; }
+
+.btn-saltar { 
+    background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); flex-direction: row; height: 60px;
+}
+
+/* BOTONES ROJOS (ARREGLO ANCHO) */
+.btn-danger, .btn-stop-emergencia, .btn-cancelar {
+    background: var(--danger); color: white; width: 100%;
+    padding: 18px; font-size: 1.1rem; font-weight: 700; border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(255, 77, 77, 0.4);
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-stop-emergencia { margin-top: 20px; }
+
+/* QR */
+#qr-container { background: white; padding: 10px; border-radius: 20px; margin: 20px auto; display: inline-block; }
+#qr-image { width: 180px; height: 180px; display: block; transition: opacity 0.3s;}
+.blink { animation: parpadeo 1.5s infinite; color: var(--highlight-green); margin-top: 10px; display: block;}
+@keyframes parpadeo { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+/* PROGRESO */
+.progreso-container { width: 100%; height: 30px; background: rgba(255,255,255,0.15); border-radius: 50px; margin: 20px 0; padding: 3px; overflow: hidden; }
+#barra-progreso { width: 0%; height: 100%; background: var(--highlight-green); border-radius: 50px; transition: width 0.1s linear; box-shadow: 0 0 15px var(--highlight-green); }
+
+/* ADMIN PANEL */
+#admin-panel {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(5, 25, 55, 0.98); z-index: 100;
+    padding: 30px; display: flex; flex-direction: column; align-items: stretch;
+}
+.admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px; margin-bottom: 20px; }
+.btn-close { background: transparent; padding: 5px; width: auto; box-shadow: none; display: block; }
+#admin-login-view, #admin-dashboard-view { width: 100%; display: flex; flex-direction: column; align-items: center; }
+#admin-pass { padding: 15px; font-size: 1.2rem; border-radius: 15px; border: none; text-align: center; width: 100%; margin-bottom: 10px;}
+.btn-login { background: var(--highlight-green); width: 100%; padding: 15px;}
+.stats-box { width: 100%; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; margin-bottom: 25px; text-align: left; }
+.stats-box span { float: right; font-weight: bold; color: var(--highlight-green); }
+.btn-admin { font-size: 0.9rem; padding: 15px; background: white; }
+
+/* UTILIDADES */
+.oculto { display: none !important; }
+
+/* ALERTA */
+#custom-alert-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.85); z-index: 2000;
+    display: flex; justify-content: center; align-items: center; padding: 20px;
+}
+.custom-alert-box {
+    background: #1a4f7a; border: 2px solid var(--highlight-green);
+    box-shadow: 0 0 30px rgba(30, 255, 165, 0.3); border-radius: 30px;
+    padding: 30px; width: 100%; max-width: 400px; text-align: center;
+}
+.alert-header { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; gap: 10px; color: var(--highlight-green);}
+.btn-alert-ok { background: var(--highlight-green); width: 100%; color: var(--text-dark); margin-top: 15px;}
