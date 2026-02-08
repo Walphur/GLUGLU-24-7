@@ -33,11 +33,9 @@
         <section id="pantalla-pago" class="vista oculto">
             <h2>Escanee para pagar</h2>
             <p id="detalle-pago">--</p>
-            
             <div id="qr-container">
                 <img id="qr-image" src="" alt="QR Pago">
             </div>
-            
             <p id="msg-pago" style="margin-top: 20px; font-weight: 600;">Iniciando pago...</p>
             <button class="btn-cancelar" onclick="cancelar()">Cancelar Operación</button>
         </section>
@@ -45,7 +43,6 @@
         <section id="pantalla-lavado" class="vista oculto">
             <h2 id="titulo-lavado">¿Desea enjuagar el bidón?</h2>
             <p id="instruccion-lavado">Coloque el bidón <b>boca abajo</b> sobre el aspersor.</p>
-            
             <div class="grid-lavado" id="botones-lavado">
                 <button onclick="ejecutarEnjuague()" class="btn-enjuague">
                     <svg class="icon-btn" viewBox="0 0 24 24"><path d="M12 22c4.97 0 9-4.03 9-9c0-4.97-9-13-9-13S3 8.03 3 13c0 4.97 4.03 9 9 9z"/></svg>
@@ -64,29 +61,25 @@
                 <div id="barra-progreso"></div>
             </div>
             <p id="litros-contador">0.00 / 0.00 L</p>
-            
             <button class="btn-stop-emergencia" onclick="pausarCarga(true)">
                 <svg class="icon-btn" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
                 PAUSAR / EMERGENCIA
             </button>
         </section>
 
-        <section id="pantalla-error" class="vista oculto">
-            </section>
+        <section id="pantalla-error" class="vista oculto"></section>
 
         <section id="admin-panel" class="vista oculto">
             <div class="admin-header">
                 <h2>Administrador</h2>
                 <button onclick="cerrarAdmin()" class="btn-close">✕</button>
             </div>
-
             <div id="admin-login-view">
                 <p style="margin-bottom: 15px;">Ingrese contraseña:</p>
                 <input type="password" id="admin-pass" placeholder="****">
                 <button onclick="verificarAdmin()" class="btn-login">Ingresar</button>
                 <p id="admin-error" class="error-msg"></p>
             </div>
-
             <div id="admin-dashboard-view" class="oculto">
                 <div class="stats-box">
                     <p>Total: <span id="stat-litros">1450.5 L</span></p>

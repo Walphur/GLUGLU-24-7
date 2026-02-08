@@ -3,7 +3,7 @@ const ICONS = {
     PLAY: `<svg class="icon-btn" style="fill:#051937" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`,
     PAUSE: `<svg class="icon-large" style="fill:#ffeb3b" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`,
     STOP_HAND: `<svg class="icon-large" style="fill:#ff4d4d" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`,
-    TRASH: `<svg class="icon-btn" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`
+    TRASH: `<svg class="icon-btn" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`,
 };
 
 // --- ESTADO ---
@@ -12,7 +12,6 @@ let litrosCargados = 0;
 let loopCarga;
 let sensorBidonDetectado = true; 
 
-// --- NAVEGACIÓN SEGURA ---
 function mostrarPantalla(idPantalla) {
     document.querySelectorAll('.vista').forEach(el => el.classList.add('oculto'));
     document.getElementById(idPantalla).classList.remove('oculto');
@@ -34,18 +33,32 @@ async function iniciarPagoReal(litros, precio) {
     msgPago.innerText = "Conectando con Mercado Pago...";
     msgPago.classList.remove('blink');
 
-    await new Promise(resolve => setTimeout(resolve, 1500)); 
-
-    qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=0f203e&data=MP_ORDEN_${Math.floor(Math.random()*99999)}`;
-    qrImage.style.opacity = '1';
-    msgPago.innerText = "¡Escanee el QR para pagar!";
-
-    console.log("[BACKEND] Esperando webhook...");
-    setTimeout(() => {
-        msgPago.innerText = "¡Pago Aprobado!";
-        msgPago.classList.add('blink');
-        setTimeout(procesarPostPago, 1500);
-    }, 4000); 
+    try {
+        const response = await fetch('/create_preference', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ litros, precio })
+        });
+        const data = await response.json();
+        
+        qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=0f203e&data=${encodeURIComponent(data.init_point)}`;
+        
+        qrImage.onload = () => {
+            qrImage.style.opacity = '1';
+            msgPago.innerText = "¡Escanee el QR para pagar!";
+            
+            // Simulación de espera (Polling)
+            console.log("Esperando pago...");
+            setTimeout(() => {
+                msgPago.innerText = "¡Pago Aprobado!";
+                msgPago.classList.add('blink');
+                setTimeout(procesarPostPago, 1500);
+            }, 8000); // 8 segs para que tengas tiempo de probar
+        };
+    } catch (e) {
+        console.error(e);
+        msgPago.innerText = "Error de conexión";
+    }
 }
 
 function procesarPostPago() {
@@ -139,7 +152,6 @@ function finalizar(esExito) {
 function cancelarDefinitivo() {
     let saldo = cargaSeleccionada.litros - litrosCargados;
     let codigo = `REF-${Math.floor(Math.random()*9000)+1000}`;
-    
     let htmlCodigo = `<div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; margin-top:15px; font-family:monospace; font-size:1.4rem; letter-spacing:2px; border: 2px dashed var(--highlight-green);">${codigo}</div>`;
     
     mostrarAlerta(`
@@ -184,14 +196,9 @@ function cerrarAlerta() { document.getElementById('custom-alert-overlay').classL
 function mostrarAlerta(msg, titulo) {
     document.getElementById('alert-title').innerText = titulo || "Información";
     document.getElementById('alert-msg').innerHTML = msg;
-    
     const footerBtn = document.querySelector('.alert-footer .btn-alert-ok');
-    if (msg.includes('<button')) {
-        footerBtn.style.display = 'none';
-    } else {
-        footerBtn.style.display = 'block';
-    }
-    
+    if (msg.includes('<button')) footerBtn.style.display = 'none';
+    else footerBtn.style.display = 'block';
     document.getElementById('custom-alert-overlay').classList.remove('oculto');
 }
 

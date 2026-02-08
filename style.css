@@ -36,11 +36,10 @@ body {
     text-align: center;
     position: relative; 
     overflow: hidden; 
-    
-    /* CENTRADO Y ESTIRAMIENTO */
+    /* ESTO ARREGLA EL ANCHO: Estira todo al 100% */
     display: flex;
     flex-direction: column;
-    align-items: stretch; /* Estira los hijos al 100% */
+    align-items: stretch; 
 }
 
 section.vista {
@@ -80,26 +79,45 @@ button span { font-size: 0.9rem; color: #666; font-weight: 400; margin-top: 5px;
 .btn-row-flex { flex-direction: row !important; gap: 5px; }
 
 /* LAVADO */
-.grid-lavado {
-    display: flex; flex-direction: column; gap: 15px; width: 100%;
-}
+.grid-lavado { display: flex; flex-direction: column; gap: 15px; width: 100%; }
+
 .btn-enjuague { 
-    background: var(--wash-blue); color: white; flex-direction: row; height: 80px;
-    justify-content: center; gap: 10px; 
+    background: var(--wash-blue); 
+    color: white; 
+    flex-direction: row; 
+    height: 80px;
+    justify-content: center; 
+    gap: 10px; /* Separación entre "Enjuagar" y "(3 segs)" */
 }
-/* ARREGLO DEL TEXTO GRIS */
-.btn-enjuague span { color: rgba(255,255,255,0.9) !important; font-size: 1rem; margin-top: 0; }
+
+/* CORRECCIÓN TEXTO (3 SEGS) */
+.btn-enjuague span { 
+    color: #ffffff !important; /* Blanco forzado */
+    opacity: 1;
+    font-size: 1rem; 
+    margin-top: 0; 
+    margin-left: 0;
+    font-weight: 400;
+}
 
 .btn-saltar { 
     background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); flex-direction: row; height: 60px;
 }
 
-/* BOTONES ROJOS (ARREGLO ANCHO) */
+/* BOTONES ROJOS (CORRECCIÓN ANCHO) */
 .btn-danger, .btn-stop-emergencia, .btn-cancelar {
-    background: var(--danger); color: white; width: 100%;
-    padding: 18px; font-size: 1.1rem; font-weight: 700; border-radius: 20px;
+    background: var(--danger); 
+    color: white; 
+    width: 100% !important; /* Fuerza ancho completo */
+    padding: 18px; 
+    font-size: 1.1rem; 
+    font-weight: 700; 
+    border-radius: 20px;
     box-shadow: 0 5px 15px rgba(255, 77, 77, 0.4);
-    display: flex; align-items: center; justify-content: center; gap: 10px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 10px;
 }
 .btn-stop-emergencia { margin-top: 20px; }
 
