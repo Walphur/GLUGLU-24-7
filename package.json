@@ -1,15 +1,16 @@
 {
   "name": "gluglu-vending",
   "version": "1.0.0",
-  "description": "Interfaz Vending Machine GluGlu",
+  "description": "Interfaz Vending GluGlu",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "mercadopago": "^2.0.8"
   },
   "engines": {
-    "node": ">=14.x"
+    "node": ">=18.x"
   }
 }
