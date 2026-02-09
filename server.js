@@ -4,10 +4,11 @@ const path = require('path');
 const app = express();
 
 // --- CONFIGURACIÓN ---
-// Tu Access Token REAL configurado
-const client = new MercadoPagoConfig({ 
-    accessToken: 'APP_USR-43f693a3-c4f2-44b3-a0e9-14a775d88eb9' 
-});
+// ACÁ ESTÁ EL CAMBIO: Le decimos al código que busque la variable en Render
+// Si no la encuentra, usa el texto que pongamos después del "||"
+const accessToken = process.env.MP_ACCESS_TOKEN || 'TU_TOKEN_DE_PRUEBA_ACÁ_POR_SI_ACASO';
+
+const client = new MercadoPagoConfig({ accessToken: accessToken });
 
 const port = process.env.PORT || 3000;
 
