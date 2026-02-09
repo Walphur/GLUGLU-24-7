@@ -25,6 +25,9 @@ function seleccionar(litros, precio) {
     iniciarPagoReal(litros, precio);
 }
 
+// Variable global para detener el chequeo si cancelan
+let intervaloChequeo;
+
 async function iniciarPagoReal(litros, precio) {
     const qrImage = document.getElementById('qr-image');
     const msgPago = document.getElementById('msg-pago');
@@ -41,24 +44,42 @@ async function iniciarPagoReal(litros, precio) {
         });
         const data = await response.json();
         
+        // Generamos QR
         qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=0f203e&data=${encodeURIComponent(data.init_point)}`;
         
         qrImage.onload = () => {
             qrImage.style.opacity = '1';
             msgPago.innerText = "¡Escanee el QR para pagar!";
             
-            // Simulación de espera (Polling)
-            console.log("Esperando pago...");
-            setTimeout(() => {
-                msgPago.innerText = "¡Pago Aprobado!";
-                msgPago.classList.add('blink');
-                setTimeout(procesarPostPago, 1500);
-            }, 8000); // 8 segs para que tengas tiempo de probar
+            // --- AQUÍ EL CAMBIO: PREGUNTAR AL SERVIDOR SI YA PAGARON ---
+            clearInterval(intervaloChequeo);
+            intervaloChequeo = setInterval(async () => {
+                try {
+                    const resEstado = await fetch(`/order_status/${data.orderId}`);
+                    const jsonEstado = await resEstado.json();
+
+                    if (jsonEstado.status === 'approved') {
+                        clearInterval(intervaloChequeo); // Dejamos de preguntar
+                        msgPago.innerText = "¡Pago Aprobado!";
+                        msgPago.style.color = "var(--highlight-green)";
+                        msgPago.classList.add('blink');
+                        setTimeout(procesarPostPago, 1500); // Recién acá carga el agua
+                    }
+                } catch (err) {
+                    console.error("Error verificando pago", err);
+                }
+            }, 3000); // Pregunta cada 3 segundos
         };
     } catch (e) {
         console.error(e);
         msgPago.innerText = "Error de conexión";
     }
+}
+
+// Agregar esto en la función cancelar() para que deje de preguntar si el cliente se va
+function cancelar() {
+    clearInterval(intervaloChequeo); // <--- IMPORTANTE
+    mostrarPantalla('pantalla-principal');
 }
 
 function procesarPostPago() {
