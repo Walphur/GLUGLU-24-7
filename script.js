@@ -110,12 +110,20 @@ async function iniciarPagoReal(litros, precio) {
 
                     if (jsonEstado.status === 'approved') {
                         clearInterval(intervaloChequeo);
-                        clearInterval(timerCuentaRegresiva); // Paramos el reloj
+                        clearInterval(timerCuentaRegresiva);
                         
                         msgPago.innerText = "¡Pago Aprobado!";
                         msgPago.style.color = "#1effa5";
                         msgPago.classList.add('blink');
                         timerDisplay.innerText = ""; 
+                        
+                        // --- NUEVO: AVISAR AL SERVIDOR QUE ACTIVE EL ESP32 ---
+                        // Enviamos los litros seleccionados
+                        fetch('/activar_maquina', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ litros: cargaSeleccionada.litros })
+                        }).catch(e => console.error("Error activando hardware:", e));
                         
                         setTimeout(procesarPostPago, 1500); 
                     }
