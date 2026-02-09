@@ -1,4 +1,6 @@
-// --- CONSTANTES SVG ---
+// --- CONSTANTES ---
+const TIEMPO_ESPERA_PAGO = 180; // 3 minutos en segundos para pagar
+const TIEMPO_INACTIVIDAD = 60;  // 1 minuto en menú principal para volver al screensaver
 const ICONS = {
     PLAY: `<svg class="icon-btn" style="fill:#051937" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`,
     PAUSE: `<svg class="icon-large" style="fill:#ffeb3b" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`,
@@ -10,14 +12,50 @@ const ICONS = {
 let cargaSeleccionada = { litros: 0, precio: 0 };
 let litrosCargados = 0;
 let loopCarga;
-let sensorBidonDetectado = true; 
+let intervaloChequeo; // Para el pago
+let timerCuentaRegresiva; // Para el reloj visual de 3 min
+let timerInactividad; // Para volver al screensaver
+
+// --- SCREENSAVER Y GESTIÓN DE PANTALLAS ---
+function despertarApp() {
+    document.getElementById('screensaver').classList.add('oculto');
+    resetTimerInactividad(); // Arranca el contador de inactividad
+}
 
 function mostrarPantalla(idPantalla) {
     document.querySelectorAll('.vista').forEach(el => el.classList.add('oculto'));
     document.getElementById(idPantalla).classList.remove('oculto');
+    
+    // Si estamos en el menú principal, activamos el timer para volver al screensaver
+    if (idPantalla === 'pantalla-principal') {
+        resetTimerInactividad();
+    } else {
+        // Si estamos pagando o cargando, desactivamos el screensaver automático
+        clearTimeout(timerInactividad);
+    }
 }
 
-// --- 1. SELECCIÓN Y PAGO ---
+function resetTimerInactividad() {
+    clearTimeout(timerInactividad);
+    timerInactividad = setTimeout(() => {
+        // Si nadie toca nada por X tiempo, vuelve el screensaver
+        document.getElementById('screensaver').classList.remove('oculto');
+        mostrarPantalla('pantalla-principal'); // Reseteamos vistas por debajo
+    }, TIEMPO_INACTIVIDAD * 1000);
+}
+
+// Detectar toques para resetear inactividad (solo si no está el screensaver)
+document.addEventListener('click', () => {
+    if (document.getElementById('screensaver').classList.contains('oculto')) {
+        // Solo reseteamos si estamos en menú principal (para no interrumpir pagos o cargas)
+        if(!document.getElementById('pantalla-principal').classList.contains('oculto')) {
+            resetTimerInactividad();
+        }
+    }
+});
+
+
+// --- SELECCIÓN Y PAGO ---
 function seleccionar(litros, precio) {
     cargaSeleccionada = { litros, precio };
     document.getElementById('detalle-pago').innerHTML = `<b>${litros} Litros</b> <br> Total: $${precio}`;
@@ -25,16 +63,29 @@ function seleccionar(litros, precio) {
     iniciarPagoReal(litros, precio);
 }
 
-// Variable global para detener el chequeo si cancelan
-let intervaloChequeo;
-
 async function iniciarPagoReal(litros, precio) {
     const qrImage = document.getElementById('qr-image');
     const msgPago = document.getElementById('msg-pago');
+    const timerDisplay = document.getElementById('timer-cuenta-regresiva');
 
     qrImage.style.opacity = '0.3';
     msgPago.innerText = "Conectando con Mercado Pago...";
     msgPago.classList.remove('blink');
+    
+    // INICIAR CUENTA REGRESIVA VISUAL
+    let segundosRestantes = TIEMPO_ESPERA_PAGO;
+    clearInterval(timerCuentaRegresiva);
+    
+    timerCuentaRegresiva = setInterval(() => {
+        segundosRestantes--;
+        let min = Math.floor(segundosRestantes / 60);
+        let sec = segundosRestantes % 60;
+        timerDisplay.innerText = `${min < 10 ? '0'+min : min}:${sec < 10 ? '0'+sec : sec}`;
+        
+        if (segundosRestantes <= 0) {
+            cancelar(); // SE ACABÓ EL TIEMPO
+        }
+    }, 1000);
 
     try {
         const response = await fetch('/create_preference', {
@@ -44,31 +95,32 @@ async function iniciarPagoReal(litros, precio) {
         });
         const data = await response.json();
         
-        // Generamos QR
         qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=0f203e&data=${encodeURIComponent(data.init_point)}`;
         
         qrImage.onload = () => {
             qrImage.style.opacity = '1';
             msgPago.innerText = "¡Escanee el QR para pagar!";
             
-            // --- AQUÍ EL CAMBIO: PREGUNTAR AL SERVIDOR SI YA PAGARON ---
-            clearInterval(intervaloChequeo);
+            if (intervaloChequeo) clearInterval(intervaloChequeo);
+            
             intervaloChequeo = setInterval(async () => {
                 try {
                     const resEstado = await fetch(`/order_status/${data.orderId}`);
                     const jsonEstado = await resEstado.json();
 
                     if (jsonEstado.status === 'approved') {
-                        clearInterval(intervaloChequeo); // Dejamos de preguntar
+                        clearInterval(intervaloChequeo);
+                        clearInterval(timerCuentaRegresiva); // Paramos el reloj
+                        
                         msgPago.innerText = "¡Pago Aprobado!";
-                        msgPago.style.color = "var(--highlight-green)";
+                        msgPago.style.color = "#1effa5";
                         msgPago.classList.add('blink');
-                        setTimeout(procesarPostPago, 1500); // Recién acá carga el agua
+                        timerDisplay.innerText = ""; 
+                        
+                        setTimeout(procesarPostPago, 1500); 
                     }
-                } catch (err) {
-                    console.error("Error verificando pago", err);
-                }
-            }, 3000); // Pregunta cada 3 segundos
+                } catch (err) { console.error(err); }
+            }, 3000);
         };
     } catch (e) {
         console.error(e);
@@ -76,11 +128,15 @@ async function iniciarPagoReal(litros, precio) {
     }
 }
 
-// Agregar esto en la función cancelar() para que deje de preguntar si el cliente se va
 function cancelar() {
-    clearInterval(intervaloChequeo); // <--- IMPORTANTE
+    clearInterval(intervaloChequeo);
+    clearInterval(timerCuentaRegresiva);
     mostrarPantalla('pantalla-principal');
+    // Forzamos inactividad rápida para que si se fue el cliente, aparezca el screensaver pronto
+    resetTimerInactividad(); 
 }
+
+// ... (Resto de funciones: procesarPostPago, lavado, llenado, admin, etc. IGUAL QUE ANTES) ...
 
 function procesarPostPago() {
     if (cargaSeleccionada.litros >= 10) {
@@ -91,13 +147,14 @@ function procesarPostPago() {
     }
 }
 
-// --- 2. LAVADO ---
 function configurarPantallaLavado() {
     document.getElementById('titulo-lavado').innerText = "¿Desea enjuagar el bidón?";
     document.getElementById('botones-lavado').classList.remove('oculto');
 }
 
 function ejecutarEnjuague() {
+    // Simulamos sensor siempre true por ahora
+    let sensorBidonDetectado = true; 
     if (!sensorBidonDetectado) {
         mostrarAlerta("No se detecta el bidón. Colóquelo boca abajo.", "Error Sensor");
         return;
@@ -117,7 +174,6 @@ function mostrarConfirmacionParaLlenar() {
     btns.classList.remove('oculto');
 }
 
-// --- 3. LLENADO ---
 function irALlenado(esReanudacion) {
     if (!esReanudacion) litrosCargados = 0;
     mostrarPantalla('pantalla-llenado');
@@ -148,7 +204,6 @@ function pausarCarga(esEmergencia) {
         ${icono}
         <h2 style="color:${color}">${titulo}</h2>
         <p style="margin-bottom:20px">Llevas cargados: <b>${litrosCargados.toFixed(2)} L</b>.<br>Acomoda el bidón y continúa.</p>
-        
         <div class="grid-botones" style="display:flex; flex-direction:column; gap:15px; width:100%;">
             <button onclick="irALlenado(true)" class="btn-destacado btn-row-flex" style="width:100%">
                 ${ICONS.PLAY} CONTINUAR
@@ -161,7 +216,6 @@ function pausarCarga(esEmergencia) {
     mostrarPantalla('pantalla-error');
 }
 
-// --- 4. FINALIZAR / CANCELAR ---
 function finalizar(esExito) {
     clearInterval(loopCarga);
     if (esExito) {
@@ -172,19 +226,8 @@ function finalizar(esExito) {
 
 function cancelarDefinitivo() {
     let saldo = cargaSeleccionada.litros - litrosCargados;
-    let codigo = `REF-${Math.floor(Math.random()*9000)+1000}`;
-    let htmlCodigo = `<div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:10px; margin-top:15px; font-family:monospace; font-size:1.4rem; letter-spacing:2px; border: 2px dashed var(--highlight-green);">${codigo}</div>`;
-    
-    mostrarAlerta(`
-        Operación cancelada.<br>Saldo pendiente: ${saldo.toFixed(2)}L.<br>${htmlCodigo}<br>
-        <button onclick="location.reload()" class="btn-alert-ok" style="background:white; color:#051937; margin-top:15px">🔄 Reiniciar Ahora</button>
-    `, "Finalizado");
-    
-    setTimeout(() => location.reload(), 8000);
-}
-
-function cancelar() {
-    mostrarPantalla('pantalla-principal');
+    mostrarAlerta(`Operación cancelada.<br>Saldo pendiente: ${saldo.toFixed(2)}L.`, "Finalizado");
+    setTimeout(() => location.reload(), 5000);
 }
 
 function actualizarBarra() {
@@ -217,9 +260,6 @@ function cerrarAlerta() { document.getElementById('custom-alert-overlay').classL
 function mostrarAlerta(msg, titulo) {
     document.getElementById('alert-title').innerText = titulo || "Información";
     document.getElementById('alert-msg').innerHTML = msg;
-    const footerBtn = document.querySelector('.alert-footer .btn-alert-ok');
-    if (msg.includes('<button')) footerBtn.style.display = 'none';
-    else footerBtn.style.display = 'block';
     document.getElementById('custom-alert-overlay').classList.remove('oculto');
 }
 

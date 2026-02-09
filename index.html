@@ -7,6 +7,15 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="screensaver" class="screensaver" onclick="despertarApp()">
+        <div class="content-saver">
+            <img src="gluglu.png" class="logo-saver animate-float">
+            <h1>¡Agua Pura 24hs!</h1>
+            <p>1. Elegí tu bidón<br>2. Escaneá el QR<br>3. Llená al instante</p>
+            <div class="touch-hint">👆 TOCA LA PANTALLA PARA COMENZAR</div>
+        </div>
+    </div>
+
     <div id="app">
         <header>
             <div class="status-bar">
@@ -33,6 +42,9 @@
         <section id="pantalla-pago" class="vista oculto">
             <h2>Escanee para pagar</h2>
             <p id="detalle-pago">--</p>
+            
+            <div id="timer-cuenta-regresiva" class="timer-warning">03:00</div>
+            
             <div id="qr-container">
                 <img id="qr-image" src="" alt="QR Pago">
             </div>

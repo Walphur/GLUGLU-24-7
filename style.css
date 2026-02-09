@@ -162,3 +162,38 @@ button span { font-size: 0.9rem; color: #666; font-weight: 400; margin-top: 5px;
 }
 .alert-header { display: flex; align-items: center; justify-content: center; margin-bottom: 20px; gap: 10px; color: var(--highlight-green);}
 .btn-alert-ok { background: var(--highlight-green); width: 100%; color: var(--text-dark); margin-top: 15px;}
+/* ... (Todo lo anterior igual) ... */
+
+/* SCREENSAVER */
+.screensaver {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: linear-gradient(135deg, #051937 0%, #004d7a 100%);
+    z-index: 5000;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    color: white; text-align: center; cursor: pointer;
+    transition: opacity 0.5s ease;
+}
+
+.screensaver.oculto {
+    opacity: 0; pointer-events: none;
+}
+
+.content-saver h1 { font-size: 2.5rem; margin: 20px 0; color: var(--highlight-green); text-shadow: 0 0 20px rgba(30,255,165,0.4); }
+.content-saver p { font-size: 1.4rem; line-height: 1.8; opacity: 0.9; }
+.logo-saver { width: 150px; filter: drop-shadow(0 0 15px rgba(255,255,255,0.2)); }
+
+.animate-float { animation: float 3s ease-in-out infinite; }
+@keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } }
+
+.touch-hint {
+    margin-top: 50px; font-size: 1.5rem; font-weight: bold;
+    color: var(--highlight-green); animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+/* TIMER DE CUENTA REGRESIVA EN PAGO */
+.timer-warning {
+    font-size: 2rem; font-weight: bold; color: #ffeb3b;
+    background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 10px;
+    margin-bottom: 10px; display: inline-block;
+}
