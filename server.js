@@ -6,7 +6,7 @@ const app = express();
 // --- CONFIGURACIÓN ---
 // Tu Token de PRUEBA (El que empieza con TEST-)
 const client = new MercadoPagoConfig({ 
-    accessToken: 'TAPP_USR-6368961490000082-020819-5e91308583a50f068b9c249f7ca349a4-3189205482' 
+    accessToken: 'APP_USR-6368961490000082-020819-5e91308583a50f068b9c249f7ca349a4-3189205482' 
 });
 
 const port = process.env.PORT || 3000;
