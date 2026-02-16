@@ -7,7 +7,7 @@ const app = express();
 // --- CONFIGURACIÓN ---
 // Tu Token REAL o de PRUEBA (el que estés usando)
 const client = new MercadoPagoConfig({ 
-    accessToken: 'APP_USR-6368961490000082-020819-5e91308583a50f068b9c249f7ca349a4-3189205482' 
+    accessToken: 'APP_USR-4412540692098276-020819-89b016c30d71cac187cdada5c6e8f33c-233244417' 
 });
 
 const port = process.env.PORT || 3000;
